@@ -1,6 +1,9 @@
 import sys
 import queue
 import enum
+import random
+import time
+import matplotlib.pyplot as plt
 
 TIME = 0
 
@@ -89,9 +92,92 @@ def DFS_visit(graph, element, time, list = None) :
         list.insert(0, element)
     return time
 
+def sum_edges(graph) :
+    """ Vraca sumu svih ivica grafa """
+    sum = 0
+    for key in graph.keys() :
+        sum += len(graph[key])
+    return sum
+
+def sum_vertexes(graph) :
+    """ Ukupan broj svih cvorova """
+    return len(graph.keys())
+
+def random_vert(size, elements) :
+    """ Generisanje liste random cvorova """
+    vertices_names = random.sample(range(1, size + 1), elements)
+    vertices = []
+    for item in vertices_names :
+        vertices.append(Vertex(item))
+    return vertices
+
+def generate_graph(size) :
+    graph = {}
+    vertices = random_vert(10000, size)
+    for vertex in vertices :
+        graph[vertex] = []
+    for item in graph :
+        edge_number = random.randint(0, size)
+        random.shuffle(vertices)
+        graph[item] = vertices[0:edge_number]
+    return graph
+
+def source(graph) :
+    for item in graph :
+        return item
+
+"""option = 1 -> BFS
+   option = 2 -> DFS
+"""
+def time_measure(graph, option) :
+    time_start = 0
+    time_end = 0
+    if option == 1: #BFS
+        time_start = time.clock()
+        BFS(graph, source(graph))
+        time_end = time.clock()
+    else : # DFS
+        time_start = time.clock()
+        DFS(graph, source(graph))
+        time_end = time.clock()
+    return time_end - time_start
+
+def analyse() :
+    vertices = [5, 25, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500]
+    exectimebfs = []
+    exectimedfs = []
+    edges = []
+    for item in vertices:
+        temp_graph = generate_graph(item)
+        # broj ivica
+        edges.append(sum_edges(temp_graph))
+        # vreme za BFS
+        exectimebfs.append(time_measure(temp_graph, 1))
+        # vreme za DFS
+        exectimedfs.append(time_measure(temp_graph, 2))
+    plot_graph(vertices, edges, exectimebfs, 'Breath-First-Search')
+    plot_graph(vertices, edges, exectimedfs, 'Depth-First-Search')
+
+def plot_graph(vertices, edges, exec_time, label) :
+    """Kreiranje plota"""
+    input_data = []
+    for index, item in enumerate(vertices):
+        input_data.append(item + edges[index])
+    plt.plot(input_data, exec_time, label=label)
+    plt.xlabel('V + E [n]')
+    plt.ylabel('T[S]')
+    plt.legend()
+    print(label)
+    for index, item in enumerate(vertices):
+        print("Number of vertecies: {} Number of edges: {} Time: {}"\
+        .format(item, edges[index], exec_time[index]))
+
+analyse()
+plt.show()
+        
     
 
-
+"""
 # Main
 v1 = Vertex(1)
 v2 = Vertex(2)
@@ -192,3 +278,6 @@ print("\nTopological sort")
 DFS(GRAPH, WATCH, list)
 for item in list :
     print(item.name)
+
+"""
+
